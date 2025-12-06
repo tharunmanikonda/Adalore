@@ -12,7 +12,6 @@ import {
   createAdvertiser,
   deleteAdvertiser,
 } from '../services/api';
-import { isSupabaseConfigured } from '../lib/supabase';
 
 const CATEGORIES = ['fitness', 'beauty', 'electronics', 'fashion', 'food', 'home'];
 
@@ -55,34 +54,11 @@ export function Admin() {
       setAdvertisers(advertisersData);
       setOffers(offersData);
     } catch (err) {
-      setError('Failed to load data. Make sure Supabase is configured and tables exist.');
+      setError('Failed to load data from API.');
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }
-
-  if (!isSupabaseConfigured) {
-    return (
-      <div className="min-h-screen bg-gray-100 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-yellow-800 mb-2">Supabase Not Configured</h2>
-            <p className="text-yellow-700 mb-4">
-              To use the admin panel, you need to set up Supabase:
-            </p>
-            <ol className="list-decimal list-inside text-yellow-700 space-y-2">
-              <li>Run the SQL in <code className="bg-yellow-100 px-1 rounded">schema/supabase_setup.sql</code> in your Supabase SQL Editor</li>
-              <li>Make sure your <code className="bg-yellow-100 px-1 rounded">.env</code> file has the correct credentials</li>
-              <li>Restart the development server</li>
-            </ol>
-            <Link to="/" className="inline-block mt-4 text-blue-600 hover:underline">
-              ← Back to Demo
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   return (

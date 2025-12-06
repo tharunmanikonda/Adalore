@@ -9,7 +9,6 @@ import type { TrackingEvent } from '../types';
 import type { GetOfferResponse, MatchingDebugInfo, Merchant, Offer } from '../types';
 import { selectNextOffer } from '../services/matchingEngine';
 import { getMerchants, getActiveOffers, recordOfferClick, recordOfferImpression, recordOfferSkip } from '../services/api';
-import { isSupabaseConfigured } from '../lib/supabase';
 import { merchants as mockMerchants, offers as mockOffers } from '../data/mockData';
 
 export function Demo() {
@@ -26,10 +25,10 @@ export function Demo() {
   const [usingDatabase, setUsingDatabase] = useState(false);
   const [skippedOfferIds, setSkippedOfferIds] = useState<Set<string>>(new Set());
 
-  // Load data from Supabase or use mock data
+  // Load data from API or use mock data
   useEffect(() => {
     async function loadData() {
-      if (isSupabaseConfigured) {
+      try {
         const [dbMerchants, dbOffers] = await Promise.all([
           getMerchants(),
           getActiveOffers(),
@@ -41,10 +40,11 @@ export function Demo() {
           setSelectedMerchantId(dbMerchants[0].id);
           setUsingDatabase(true);
         } else {
-          // Fallback to mock data if DB is empty
+          // Fallback to mock data if API returns empty
           setSelectedMerchantId(mockMerchants[0].id);
         }
-      } else {
+      } catch {
+        // Fallback to mock data if API fails
         setSelectedMerchantId(mockMerchants[0].id);
       }
       setIsInitialLoading(false);
@@ -54,7 +54,7 @@ export function Demo() {
 
   const selectedMerchant = merchants.find(m => m.id === selectedMerchantId);
 
-  // Function to refresh offers from database
+  // Function to refresh offers from API
   const refreshOffers = useCallback(async () => {
     if (usingDatabase) {
       const freshOffers = await getActiveOffers();
@@ -82,7 +82,7 @@ export function Demo() {
         setCurrentOffer(result);
         setDebugInfo(result.debug || null);
 
-        // Record impression in database
+        // Record impression via API
         if (usingDatabase) {
           await recordOfferImpression(result.offerId);
         }
@@ -112,10 +112,9 @@ export function Demo() {
   const handleClaim = useCallback(async () => {
     if (!currentOffer) return;
 
-    // Record click in database (updates CTR)
+    // Record click via API (updates CTR)
     if (usingDatabase) {
       await recordOfferClick(currentOffer.offerId);
-      // Refresh offers to get updated metrics
       await refreshOffers();
     }
 
@@ -134,14 +133,12 @@ export function Demo() {
   const handleSkip = useCallback(async () => {
     if (!currentOffer) return;
 
-    // Record skip in database (updates skip_rate)
+    // Record skip via API (updates skip_rate)
     if (usingDatabase) {
       await recordOfferSkip(currentOffer.offerId);
-      // Refresh offers to get updated metrics
       await refreshOffers();
     }
 
-    // Track the skip event in UI
     setTrackingEvents(prev => [
       {
         type: 'skip',
@@ -219,7 +216,6 @@ export function Demo() {
           orderValue={orderValue}
           onOrderValueChange={setOrderValue}
           onGetOffer={() => {
-            // Reset skipped offers when starting fresh
             setSkippedOfferIds(new Set());
             handleGetOffer(new Set());
           }}
