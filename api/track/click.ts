@@ -1,18 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { recordClick } from '../_lib/database.js';
+import { recordClick } from '../_db.js';
 
-/**
- * POST /api/track/click
- *
- * Body:
- * - offerId (required): The offer ID to record click for
- */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Handle CORS preflight
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
@@ -21,18 +15,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const { offerId } = req.body;
-
   if (!offerId || typeof offerId !== 'string') {
-    return res.status(400).json({
-      error: 'Missing required parameter: offerId',
-    });
+    return res.status(400).json({ error: 'Missing required parameter: offerId' });
   }
 
   try {
     const success = await recordClick(offerId);
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
     if (success) {
       return res.status(200).json({
         success: true,
@@ -40,9 +28,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         event: 'click',
         timestamp: new Date().toISOString(),
       });
-    } else {
-      return res.status(500).json({ error: 'Failed to record click' });
     }
+    return res.status(500).json({ error: 'Failed to record click' });
   } catch (error) {
     console.error('Error in /api/track/click:', error);
     return res.status(500).json({ error: 'Internal server error' });

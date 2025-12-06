@@ -1,12 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { deleteMerchant, updateMerchant } from '../_lib/database.js';
+import { deleteMerchant, updateMerchant } from '../_db.js';
 
-/**
- * DELETE /api/merchants/:id - Delete a merchant
- * PATCH /api/merchants/:id - Update a merchant
- */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'DELETE, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -16,7 +11,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const { id } = req.query;
-
   if (!id || typeof id !== 'string') {
     return res.status(400).json({ error: 'Merchant ID is required' });
   }

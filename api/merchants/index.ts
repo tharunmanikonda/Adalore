@@ -1,12 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getMerchants, createMerchant } from '../_lib/database.js';
+import { getMerchants, createMerchant } from '../_db.js';
 
-/**
- * GET /api/merchants - List all merchants
- * POST /api/merchants - Create a new merchant
- */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -23,22 +18,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'POST') {
       const { name, category, domain } = req.body;
-
       if (!name || !category) {
         return res.status(400).json({ error: 'Name and category are required' });
       }
-
-      const merchant = await createMerchant({
-        name,
-        category,
-        domain,
-        isActive: true,
-      });
-
+      const merchant = await createMerchant({ name, category, domain, isActive: true });
       if (!merchant) {
         return res.status(500).json({ error: 'Failed to create merchant' });
       }
-
       return res.status(201).json(merchant);
     }
 
