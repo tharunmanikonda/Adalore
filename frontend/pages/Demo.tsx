@@ -5,10 +5,10 @@ import { OfferCard } from '../components/OfferCard';
 import { DebugPanel } from '../components/DebugPanel';
 import { ThankYouPage } from '../components/ThankYouPage';
 import { TrackingStatus } from '../components/TrackingStatus';
-import type { TrackingEvent } from '../components/TrackingStatus';
+import type { TrackingEvent } from '../types';
 import type { GetOfferResponse, MatchingDebugInfo, Merchant, Offer } from '../types';
 import { selectNextOffer } from '../services/matchingEngine';
-import { getMerchants, getActiveOffers, recordOfferClick, incrementOfferImpressions, recordOfferSkip } from '../services/supabaseService';
+import { getMerchants, getActiveOffers, recordOfferClick, recordOfferImpression, recordOfferSkip } from '../services/api';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { merchants as mockMerchants, offers as mockOffers } from '../data/mockData';
 
@@ -84,7 +84,7 @@ export function Demo() {
 
         // Record impression in database
         if (usingDatabase) {
-          await incrementOfferImpressions(result.offerId);
+          await recordOfferImpression(result.offerId);
         }
 
         setTrackingEvents(prev => [

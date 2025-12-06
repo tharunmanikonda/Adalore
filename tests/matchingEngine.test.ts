@@ -4,8 +4,8 @@ import {
   isOfferEligible,
   selectNextOffer,
   getOfferRankings,
-} from '../src/services/matchingEngine';
-import { Merchant, Offer } from '../src/types';
+} from '../backend/services/matchingEngine';
+import type { Merchant, Offer } from '../backend/types';
 
 // Test data
 const createMerchant = (overrides: Partial<Merchant> = {}): Merchant => ({
@@ -31,6 +31,13 @@ const createOffer = (overrides: Partial<Offer> = {}): Offer => ({
   category: 'fitness',
   isActive: true,
   impressionsToday: 100,
+  totalImpressions: 1000,
+  totalClicks: 100,
+  totalSales: 30,
+  totalRevenue: 3000,
+  clickThroughRate: 0.1,
+  totalSkips: 50,
+  skipRate: 0.05,
   ...overrides,
 });
 

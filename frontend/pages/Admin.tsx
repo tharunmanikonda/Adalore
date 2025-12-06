@@ -11,7 +11,7 @@ import {
   getAdvertisers,
   createAdvertiser,
   deleteAdvertiser,
-} from '../services/supabaseService';
+} from '../services/api';
 import { isSupabaseConfigured } from '../lib/supabase';
 
 const CATEGORIES = ['fitness', 'beauty', 'electronics', 'fashion', 'food', 'home'];

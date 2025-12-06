@@ -8,8 +8,6 @@ interface DbMerchant {
   category: string;
   domain: string | null;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 interface DbAdvertiser {
@@ -19,8 +17,6 @@ interface DbAdvertiser {
   logo_url: string | null;
   website_url: string | null;
   is_active: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 interface DbOffer {
@@ -37,17 +33,13 @@ interface DbOffer {
   category: string;
   is_active: boolean;
   impressions_today: number;
-  // Tracking fields
   total_impressions: number;
   total_clicks: number;
   total_sales: number;
   total_revenue: number;
   click_through_rate: number;
-  // Skip tracking
   total_skips: number;
   skip_rate: number;
-  created_at: string;
-  updated_at: string;
   advertisers?: DbAdvertiser;
 }
 
@@ -78,19 +70,20 @@ function dbToOffer(db: DbOffer): Offer {
     category: db.category,
     isActive: db.is_active,
     impressionsToday: db.impressions_today,
-    // Tracking fields
     totalImpressions: db.total_impressions || 0,
     totalClicks: db.total_clicks || 0,
     totalSales: db.total_sales || 0,
     totalRevenue: db.total_revenue || 0,
     clickThroughRate: db.click_through_rate || 0,
-    // Skip tracking
     totalSkips: db.total_skips || 0,
     skipRate: db.skip_rate || 0,
   };
 }
 
-// Merchant CRUD operations
+// ============================================================================
+// READ OPERATIONS (Frontend can read directly from Supabase)
+// ============================================================================
+
 export async function getMerchants(): Promise<Merchant[]> {
   if (!isSupabaseConfigured) return [];
 
@@ -106,6 +99,76 @@ export async function getMerchants(): Promise<Merchant[]> {
 
   return (data as DbMerchant[]).map(dbToMerchant);
 }
+
+export async function getActiveOffers(): Promise<Offer[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('offers')
+    .select(`
+      *,
+      advertisers (
+        id,
+        name,
+        category,
+        logo_url
+      )
+    `)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching active offers:', error);
+    return [];
+  }
+
+  return (data as DbOffer[]).map(dbToOffer);
+}
+
+export async function getAdvertisers(): Promise<DbAdvertiser[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('advertisers')
+    .select('*')
+    .eq('is_active', true)
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching advertisers:', error);
+    return [];
+  }
+
+  return data as DbAdvertiser[];
+}
+
+export async function getOffers(): Promise<Offer[]> {
+  if (!isSupabaseConfigured) return [];
+
+  const { data, error } = await supabase
+    .from('offers')
+    .select(`
+      *,
+      advertisers (
+        id,
+        name,
+        category,
+        logo_url
+      )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching offers:', error);
+    return [];
+  }
+
+  return (data as DbOffer[]).map(dbToOffer);
+}
+
+// ============================================================================
+// WRITE OPERATIONS (Frontend uses Supabase directly for admin panel)
+// ============================================================================
 
 export async function createMerchant(merchant: Omit<Merchant, 'id'>): Promise<Merchant | null> {
   if (!isSupabaseConfigured) return null;
@@ -167,24 +230,6 @@ export async function deleteMerchant(id: string): Promise<boolean> {
   return true;
 }
 
-// Advertiser operations
-export async function getAdvertisers(): Promise<DbAdvertiser[]> {
-  if (!isSupabaseConfigured) return [];
-
-  const { data, error } = await supabase
-    .from('advertisers')
-    .select('*')
-    .eq('is_active', true)
-    .order('name');
-
-  if (error) {
-    console.error('Error fetching advertisers:', error);
-    return [];
-  }
-
-  return data as DbAdvertiser[];
-}
-
 export async function createAdvertiser(advertiser: {
   name: string;
   category: string;
@@ -227,56 +272,6 @@ export async function deleteAdvertiser(id: string): Promise<boolean> {
   }
 
   return true;
-}
-
-// Offer CRUD operations
-export async function getOffers(): Promise<Offer[]> {
-  if (!isSupabaseConfigured) return [];
-
-  const { data, error } = await supabase
-    .from('offers')
-    .select(`
-      *,
-      advertisers (
-        id,
-        name,
-        category,
-        logo_url
-      )
-    `)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching offers:', error);
-    return [];
-  }
-
-  return (data as DbOffer[]).map(dbToOffer);
-}
-
-export async function getActiveOffers(): Promise<Offer[]> {
-  if (!isSupabaseConfigured) return [];
-
-  const { data, error } = await supabase
-    .from('offers')
-    .select(`
-      *,
-      advertisers (
-        id,
-        name,
-        category,
-        logo_url
-      )
-    `)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching active offers:', error);
-    return [];
-  }
-
-  return (data as DbOffer[]).map(dbToOffer);
 }
 
 export async function createOffer(offer: {
@@ -383,14 +378,16 @@ export async function deleteOffer(id: string): Promise<boolean> {
   return true;
 }
 
-export async function incrementOfferImpressions(id: string): Promise<boolean> {
+// ============================================================================
+// TRACKING OPERATIONS (Frontend uses Supabase RPC)
+// ============================================================================
+
+export async function recordOfferImpression(id: string): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
 
-  // Try to use the new record_impression RPC function
   const { error } = await supabase.rpc('record_impression', { offer_uuid: id });
 
   if (error) {
-    // Fallback to manual update if RPC doesn't exist
     const { data } = await supabase
       .from('offers')
       .select('impressions_today, total_impressions')
@@ -414,11 +411,9 @@ export async function incrementOfferImpressions(id: string): Promise<boolean> {
 export async function recordOfferClick(id: string): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
 
-  // Try to use the record_click RPC function
   const { error } = await supabase.rpc('record_click', { offer_uuid: id });
 
   if (error) {
-    // Fallback to manual update
     const { data } = await supabase
       .from('offers')
       .select('total_clicks, total_impressions')
@@ -441,48 +436,12 @@ export async function recordOfferClick(id: string): Promise<boolean> {
   return true;
 }
 
-export async function recordOfferSale(id: string, amount: number): Promise<boolean> {
-  if (!isSupabaseConfigured) return false;
-
-  // Try to use the record_sale RPC function
-  const { error } = await supabase.rpc('record_sale', { offer_uuid: id, sale_amount: amount });
-
-  if (error) {
-    // Fallback to manual update
-    const { data } = await supabase
-      .from('offers')
-      .select('total_sales, total_revenue, total_impressions')
-      .eq('id', id)
-      .single();
-
-    if (data) {
-      const newSales = (data.total_sales || 0) + 1;
-      const newRevenue = (data.total_revenue || 0) + amount;
-      const convRate = data.total_impressions > 0 ? newSales / data.total_impressions : 0;
-      const aov = newSales > 0 ? newRevenue / newSales : 0;
-      await supabase
-        .from('offers')
-        .update({
-          total_sales: newSales,
-          total_revenue: newRevenue,
-          conversion_rate: convRate,
-          avg_order_value: aov,
-        })
-        .eq('id', id);
-    }
-  }
-
-  return true;
-}
-
 export async function recordOfferSkip(id: string): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
 
-  // Try to use the record_skip RPC function
   const { error } = await supabase.rpc('record_skip', { offer_uuid: id });
 
   if (error) {
-    // Fallback to manual update
     const { data } = await supabase
       .from('offers')
       .select('total_skips, total_impressions')

@@ -1,8 +1,4 @@
-interface TrackingEvent {
-  type: 'impression' | 'click' | 'skip';
-  offerId: string;
-  timestamp: Date;
-}
+import type { TrackingEvent } from '../types';
 
 interface TrackingStatusProps {
   events: TrackingEvent[];
@@ -85,4 +81,3 @@ export function TrackingStatus({ events }: TrackingStatusProps) {
   );
 }
 
-export type { TrackingEvent };

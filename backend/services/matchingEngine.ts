@@ -46,11 +46,6 @@ export function isOfferEligible(
  * 2. Calculate EVI for each eligible offer
  * 3. Select highest EVI
  * 4. Tie-breaker: fewer impressions today wins
- *
- * @param offers - All available offers
- * @param merchant - The merchant requesting an offer
- * @param merchantAdvertiserId - Optional: if merchant is also an advertiser, exclude their offers
- * @param includeDebug - Whether to include debug information
  */
 export function selectNextOffer(
   offers: Offer[],
@@ -69,11 +64,10 @@ export function selectNextOffer(
     candidates.push({
       offerId: offer.id,
       advertiserName: offer.advertiserName,
-      evi: Math.round(evi * 10000) / 10000, // Round to 4 decimal places
+      evi: Math.round(evi * 10000) / 10000,
       impressionsToday: offer.impressionsToday,
       eligible: eligibility.eligible,
       ineligibleReason: eligibility.reason,
-      // Include tracking metrics for debug display
       totalImpressions: offer.totalImpressions,
       totalClicks: offer.totalClicks,
       totalSales: offer.totalSales,
@@ -97,12 +91,10 @@ export function selectNextOffer(
 
   // Sort by EVI (descending), then by impressions today (ascending for fair rotation)
   eligibleOffers.sort((a, b) => {
-    // Primary sort: higher EVI first
     const eviDiff = b.evi - a.evi;
-    if (Math.abs(eviDiff) > 0.0001) { // Allow small floating point tolerance
+    if (Math.abs(eviDiff) > 0.0001) {
       return eviDiff;
     }
-    // Tie-breaker: fewer impressions today wins
     return a.impressionsToday - b.impressionsToday;
   });
 
@@ -130,7 +122,6 @@ export function selectNextOffer(
     },
   };
 
-  // Include debug info if requested
   if (includeDebug) {
     const debugInfo: MatchingDebugInfo = {
       merchantCategory: merchant.category,
@@ -147,7 +138,6 @@ export function selectNextOffer(
 
 /**
  * Get all offers sorted by EVI for a category
- * Useful for debugging and understanding offer rankings
  */
 export function getOfferRankings(
   offers: Offer[],
