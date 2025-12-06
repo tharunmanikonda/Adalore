@@ -37,6 +37,15 @@ interface DbOffer {
   category: string;
   is_active: boolean;
   impressions_today: number;
+  // Tracking fields
+  total_impressions: number;
+  total_clicks: number;
+  total_sales: number;
+  total_revenue: number;
+  click_through_rate: number;
+  // Skip tracking
+  total_skips: number;
+  skip_rate: number;
   created_at: string;
   updated_at: string;
   advertisers?: DbAdvertiser;
@@ -69,6 +78,15 @@ function dbToOffer(db: DbOffer): Offer {
     category: db.category,
     isActive: db.is_active,
     impressionsToday: db.impressions_today,
+    // Tracking fields
+    totalImpressions: db.total_impressions || 0,
+    totalClicks: db.total_clicks || 0,
+    totalSales: db.total_sales || 0,
+    totalRevenue: db.total_revenue || 0,
+    clickThroughRate: db.click_through_rate || 0,
+    // Skip tracking
+    totalSkips: db.total_skips || 0,
+    skipRate: db.skip_rate || 0,
   };
 }
 
@@ -368,20 +386,118 @@ export async function deleteOffer(id: string): Promise<boolean> {
 export async function incrementOfferImpressions(id: string): Promise<boolean> {
   if (!isSupabaseConfigured) return false;
 
-  const { error } = await supabase.rpc('increment_impressions', { offer_id: id });
+  // Try to use the new record_impression RPC function
+  const { error } = await supabase.rpc('record_impression', { offer_uuid: id });
 
   if (error) {
-    // Fallback to regular update if RPC doesn't exist
+    // Fallback to manual update if RPC doesn't exist
     const { data } = await supabase
       .from('offers')
-      .select('impressions_today')
+      .select('impressions_today, total_impressions')
       .eq('id', id)
       .single();
 
     if (data) {
       await supabase
         .from('offers')
-        .update({ impressions_today: (data.impressions_today || 0) + 1 })
+        .update({
+          impressions_today: (data.impressions_today || 0) + 1,
+          total_impressions: (data.total_impressions || 0) + 1,
+        })
+        .eq('id', id);
+    }
+  }
+
+  return true;
+}
+
+export async function recordOfferClick(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+
+  // Try to use the record_click RPC function
+  const { error } = await supabase.rpc('record_click', { offer_uuid: id });
+
+  if (error) {
+    // Fallback to manual update
+    const { data } = await supabase
+      .from('offers')
+      .select('total_clicks, total_impressions')
+      .eq('id', id)
+      .single();
+
+    if (data) {
+      const newClicks = (data.total_clicks || 0) + 1;
+      const ctr = data.total_impressions > 0 ? newClicks / data.total_impressions : 0;
+      await supabase
+        .from('offers')
+        .update({
+          total_clicks: newClicks,
+          click_through_rate: ctr,
+        })
+        .eq('id', id);
+    }
+  }
+
+  return true;
+}
+
+export async function recordOfferSale(id: string, amount: number): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+
+  // Try to use the record_sale RPC function
+  const { error } = await supabase.rpc('record_sale', { offer_uuid: id, sale_amount: amount });
+
+  if (error) {
+    // Fallback to manual update
+    const { data } = await supabase
+      .from('offers')
+      .select('total_sales, total_revenue, total_impressions')
+      .eq('id', id)
+      .single();
+
+    if (data) {
+      const newSales = (data.total_sales || 0) + 1;
+      const newRevenue = (data.total_revenue || 0) + amount;
+      const convRate = data.total_impressions > 0 ? newSales / data.total_impressions : 0;
+      const aov = newSales > 0 ? newRevenue / newSales : 0;
+      await supabase
+        .from('offers')
+        .update({
+          total_sales: newSales,
+          total_revenue: newRevenue,
+          conversion_rate: convRate,
+          avg_order_value: aov,
+        })
+        .eq('id', id);
+    }
+  }
+
+  return true;
+}
+
+export async function recordOfferSkip(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+
+  // Try to use the record_skip RPC function
+  const { error } = await supabase.rpc('record_skip', { offer_uuid: id });
+
+  if (error) {
+    // Fallback to manual update
+    const { data } = await supabase
+      .from('offers')
+      .select('total_skips, total_impressions')
+      .eq('id', id)
+      .single();
+
+    if (data) {
+      const newSkips = (data.total_skips || 0) + 1;
+      const skipRate = data.total_impressions > 0 ? newSkips / data.total_impressions : 0;
+      await supabase
+        .from('offers')
+        .update({
+          total_skips: newSkips,
+          skip_rate: skipRate,
+        })
         .eq('id', id);
     }
   }

@@ -28,10 +28,19 @@ export interface Offer {
   discountValue: number;
   offerUrl: string;
 
-  // Matching & Ranking Metrics
-  commissionRate: number;   // e.g., 0.05 for 5%
-  conversionRate: number;   // e.g., 0.03 for 3%
-  avgOrderValue: number;    // e.g., 85.00
+  // Business setting (manual)
+  commissionRate: number;   // e.g., 0.05 for 5% - set by advertiser
+
+  // Tracking Metrics (calculated from real data)
+  totalImpressions: number;  // All-time impressions
+  totalClicks: number;       // All-time clicks
+  totalSales: number;        // All-time sales
+  totalRevenue: number;      // All-time revenue from sales
+
+  // Calculated Rates (derived from tracking)
+  clickThroughRate: number;  // clicks / impressions (CTR)
+  conversionRate: number;    // sales / impressions (overall conversion)
+  avgOrderValue: number;     // totalRevenue / totalSales
 
   // Category for matching
   category: string;
@@ -41,6 +50,23 @@ export interface Offer {
 
   // Daily stats for fair rotation
   impressionsToday: number;
+
+  // Skip tracking
+  totalSkips: number;
+  skipRate: number;  // skips / impressions
+}
+
+// Offer statistics summary
+export interface OfferStats {
+  impressions: number;
+  clicks: number;
+  sales: number;
+  revenue: number;
+  ctr: number;           // Click-through rate
+  conversionRate: number; // Sales / Impressions
+  clickToSale: number;    // Sales / Clicks
+  avgOrderValue: number;
+  evi: number;
 }
 
 export interface Impression {
@@ -117,6 +143,16 @@ export interface CandidateOffer {
   impressionsToday: number;
   eligible: boolean;
   ineligibleReason?: string;
+  // Additional tracking metrics for debug display
+  totalImpressions?: number;
+  totalClicks?: number;
+  totalSales?: number;
+  totalSkips?: number;
+  clickThroughRate?: number;
+  conversionRate?: number;
+  skipRate?: number;
+  commissionRate?: number;
+  avgOrderValue?: number;
 }
 
 // Tracking event types

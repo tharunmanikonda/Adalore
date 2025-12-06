@@ -73,6 +73,16 @@ export function selectNextOffer(
       impressionsToday: offer.impressionsToday,
       eligible: eligibility.eligible,
       ineligibleReason: eligibility.reason,
+      // Include tracking metrics for debug display
+      totalImpressions: offer.totalImpressions,
+      totalClicks: offer.totalClicks,
+      totalSales: offer.totalSales,
+      totalSkips: offer.totalSkips,
+      clickThroughRate: offer.clickThroughRate,
+      conversionRate: offer.conversionRate,
+      skipRate: offer.skipRate,
+      commissionRate: offer.commissionRate,
+      avgOrderValue: offer.avgOrderValue,
     });
 
     if (eligibility.eligible) {

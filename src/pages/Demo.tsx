@@ -8,7 +8,7 @@ import { TrackingStatus } from '../components/TrackingStatus';
 import type { TrackingEvent } from '../components/TrackingStatus';
 import type { GetOfferResponse, MatchingDebugInfo, Merchant, Offer } from '../types';
 import { selectNextOffer } from '../services/matchingEngine';
-import { getMerchants, getActiveOffers } from '../services/supabaseService';
+import { getMerchants, getActiveOffers, recordOfferClick, incrementOfferImpressions, recordOfferSkip } from '../services/supabaseService';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { merchants as mockMerchants, offers as mockOffers } from '../data/mockData';
 
@@ -24,6 +24,7 @@ export function Demo() {
   const [trackingEvents, setTrackingEvents] = useState<TrackingEvent[]>([]);
   const [impressionRecorded, setImpressionRecorded] = useState(false);
   const [usingDatabase, setUsingDatabase] = useState(false);
+  const [skippedOfferIds, setSkippedOfferIds] = useState<Set<string>>(new Set());
 
   // Load data from Supabase or use mock data
   useEffect(() => {
@@ -53,7 +54,17 @@ export function Demo() {
 
   const selectedMerchant = merchants.find(m => m.id === selectedMerchantId);
 
-  const handleGetOffer = useCallback(async () => {
+  // Function to refresh offers from database
+  const refreshOffers = useCallback(async () => {
+    if (usingDatabase) {
+      const freshOffers = await getActiveOffers();
+      if (freshOffers.length > 0) {
+        setOffers(freshOffers);
+      }
+    }
+  }, [usingDatabase]);
+
+  const handleGetOffer = useCallback(async (excludeOfferIds: Set<string> = new Set()) => {
     if (!selectedMerchant) return;
 
     setIsLoading(true);
@@ -63,11 +74,18 @@ export function Demo() {
     await new Promise(resolve => setTimeout(resolve, 300));
 
     try {
-      const result = selectNextOffer(offers, selectedMerchant, undefined, true);
+      // Filter out skipped offers before matching
+      const availableOffers = offers.filter(o => !excludeOfferIds.has(o.id));
+      const result = selectNextOffer(availableOffers, selectedMerchant, undefined, true);
 
       if (result) {
         setCurrentOffer(result);
         setDebugInfo(result.debug || null);
+
+        // Record impression in database
+        if (usingDatabase) {
+          await incrementOfferImpressions(result.offerId);
+        }
 
         setTrackingEvents(prev => [
           {
@@ -89,10 +107,17 @@ export function Demo() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedMerchant, offers]);
+  }, [selectedMerchant, offers, usingDatabase]);
 
-  const handleClaim = useCallback(() => {
+  const handleClaim = useCallback(async () => {
     if (!currentOffer) return;
+
+    // Record click in database (updates CTR)
+    if (usingDatabase) {
+      await recordOfferClick(currentOffer.offerId);
+      // Refresh offers to get updated metrics
+      await refreshOffers();
+    }
 
     setTrackingEvents(prev => [
       {
@@ -103,12 +128,20 @@ export function Demo() {
       ...prev,
     ]);
 
-    alert(`Redirecting to: ${currentOffer.offer.offerUrl}\n\nIn production, this would open the advertiser's landing page.`);
-  }, [currentOffer]);
+    alert(`Redirecting to: ${currentOffer.offer.offerUrl}\n\nIn production, this would open the advertiser's landing page.\n\nClick recorded - CTR updated in database!`);
+  }, [currentOffer, usingDatabase, refreshOffers]);
 
-  const handleSkip = useCallback(() => {
+  const handleSkip = useCallback(async () => {
     if (!currentOffer) return;
 
+    // Record skip in database (updates skip_rate)
+    if (usingDatabase) {
+      await recordOfferSkip(currentOffer.offerId);
+      // Refresh offers to get updated metrics
+      await refreshOffers();
+    }
+
+    // Track the skip event in UI
     setTrackingEvents(prev => [
       {
         type: 'skip',
@@ -118,10 +151,14 @@ export function Demo() {
       ...prev,
     ]);
 
-    setCurrentOffer(null);
-    setDebugInfo(null);
-    setImpressionRecorded(false);
-  }, [currentOffer]);
+    // Add to skipped offers and show next matching offer
+    const newSkippedIds = new Set(skippedOfferIds);
+    newSkippedIds.add(currentOffer.offerId);
+    setSkippedOfferIds(newSkippedIds);
+
+    // Get next offer excluding all skipped ones
+    handleGetOffer(newSkippedIds);
+  }, [currentOffer, skippedOfferIds, handleGetOffer, usingDatabase, refreshOffers]);
 
   if (isInitialLoading) {
     return (
@@ -181,7 +218,11 @@ export function Demo() {
           onSelect={setSelectedMerchantId}
           orderValue={orderValue}
           onOrderValueChange={setOrderValue}
-          onGetOffer={handleGetOffer}
+          onGetOffer={() => {
+            // Reset skipped offers when starting fresh
+            setSkippedOfferIds(new Set());
+            handleGetOffer(new Set());
+          }}
           isLoading={isLoading}
         />
 
@@ -197,6 +238,8 @@ export function Demo() {
                 onClaim={handleClaim}
                 onSkip={handleSkip}
                 impressionRecorded={impressionRecorded}
+                skippedCount={skippedOfferIds.size}
+                hasMoreOffers={currentOffer !== null || skippedOfferIds.size === 0}
               />
             </ThankYouPage>
 

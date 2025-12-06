@@ -86,11 +86,27 @@ export const advertisers: Advertiser[] = [
     websiteUrl: 'https://powerlift.example.com',
     isActive: true,
   },
+  {
+    id: 'adv-7',
+    name: 'GlowUp Cosmetics',
+    category: 'beauty',
+    logoUrl: 'https://placehold.co/100x100/F472B6/white?text=GlowUp',
+    websiteUrl: 'https://glowup.example.com',
+    isActive: true,
+  },
+  {
+    id: 'adv-8',
+    name: 'BeautyBox',
+    category: 'beauty',
+    logoUrl: 'https://placehold.co/100x100/A855F7/white?text=BeautyBox',
+    websiteUrl: 'https://beautybox.example.com',
+    isActive: true,
+  },
 ];
 
-// Mock Offers
+// Mock Offers with FULL tracking metrics
 export const offers: Offer[] = [
-  // Fitness offers
+  // FITNESS OFFERS
   {
     id: 'offer-1',
     advertiserId: 'adv-1',
@@ -100,12 +116,23 @@ export const offers: Offer[] = [
     discountType: 'percentage',
     discountValue: 20,
     offerUrl: 'https://fitpro.example.com/offer/20off',
-    commissionRate: 0.08,    // 8%
-    conversionRate: 0.045,   // 4.5%
-    avgOrderValue: 75,
     category: 'fitness',
     isActive: true,
+    // Business setting
+    commissionRate: 0.08,  // 8%
+    // Tracking data
+    totalImpressions: 1000,
+    totalClicks: 120,      // 12% CTR - Good!
+    totalSales: 45,        // 4.5% conversion
+    totalRevenue: 3375,    // $75 AOV
+    // Calculated
+    clickThroughRate: 0.12,
+    conversionRate: 0.045,
+    avgOrderValue: 75,
     impressionsToday: 150,
+    // Skip tracking
+    totalSkips: 150,         // 15% skip rate
+    skipRate: 0.15,
   },
   {
     id: 'offer-2',
@@ -116,12 +143,19 @@ export const offers: Offer[] = [
     discountType: 'fixed_amount',
     discountValue: 30,
     offerUrl: 'https://runfast.example.com/offer/30off',
-    commissionRate: 0.06,    // 6%
-    conversionRate: 0.035,   // 3.5%
-    avgOrderValue: 120,
     category: 'fitness',
     isActive: true,
+    commissionRate: 0.06,  // 6%
+    totalImpressions: 1200,
+    totalClicks: 80,       // 6.7% CTR - Lower
+    totalSales: 35,        // 2.9% conversion
+    totalRevenue: 4200,    // $120 AOV - High!
+    clickThroughRate: 0.067,
+    conversionRate: 0.029,
+    avgOrderValue: 120,
     impressionsToday: 200,
+    totalSkips: 240,         // 20% skip rate - higher due to lower CTR
+    skipRate: 0.20,
   },
   {
     id: 'offer-3',
@@ -132,12 +166,19 @@ export const offers: Offer[] = [
     discountType: 'free_shipping',
     discountValue: 0,
     offerUrl: 'https://zenyoga.example.com/offer/freeship',
-    commissionRate: 0.10,    // 10%
-    conversionRate: 0.055,   // 5.5%
-    avgOrderValue: 65,
     category: 'fitness',
     isActive: true,
+    commissionRate: 0.10,  // 10%
+    totalImpressions: 800,
+    totalClicks: 150,      // 18.75% CTR - Excellent!
+    totalSales: 55,        // 6.9% conversion - Great!
+    totalRevenue: 3575,    // $65 AOV
+    clickThroughRate: 0.1875,
+    conversionRate: 0.069,
+    avgOrderValue: 65,
     impressionsToday: 80,
+    totalSkips: 80,          // 10% skip rate - low (popular offer)
+    skipRate: 0.10,
   },
   {
     id: 'offer-4',
@@ -148,15 +189,22 @@ export const offers: Offer[] = [
     discountType: 'percentage',
     discountValue: 15,
     offerUrl: 'https://powerlift.example.com/offer/15off',
-    commissionRate: 0.07,    // 7%
-    conversionRate: 0.040,   // 4.0%
-    avgOrderValue: 200,
     category: 'fitness',
     isActive: true,
+    commissionRate: 0.07,  // 7%
+    totalImpressions: 600,
+    totalClicks: 60,       // 10% CTR
+    totalSales: 20,        // 3.3% conversion
+    totalRevenue: 4000,    // $200 AOV - Highest!
+    clickThroughRate: 0.10,
+    conversionRate: 0.033,
+    avgOrderValue: 200,
     impressionsToday: 120,
+    totalSkips: 108,         // 18% skip rate
+    skipRate: 0.18,
   },
 
-  // Beauty offers
+  // BEAUTY OFFERS
   {
     id: 'offer-5',
     advertiserId: 'adv-3',
@@ -166,17 +214,70 @@ export const offers: Offer[] = [
     discountType: 'percentage',
     discountValue: 25,
     offerUrl: 'https://luxeskin.example.com/offer/25off',
-    commissionRate: 0.12,    // 12%
-    conversionRate: 0.060,   // 6.0%
-    avgOrderValue: 95,
     category: 'beauty',
     isActive: true,
+    commissionRate: 0.12,  // 12%
+    totalImpressions: 900,
+    totalClicks: 135,      // 15% CTR
+    totalSales: 60,        // 6.7% conversion
+    totalRevenue: 5700,    // $95 AOV
+    clickThroughRate: 0.15,
+    conversionRate: 0.067,
+    avgOrderValue: 95,
     impressionsToday: 90,
+    totalSkips: 117,         // 13% skip rate
+    skipRate: 0.13,
   },
-
-  // Electronics offers
   {
     id: 'offer-6',
+    advertiserId: 'adv-7',
+    advertiserName: 'GlowUp Cosmetics',
+    title: '30% Off Lipstick Collection',
+    description: 'Premium lipsticks in trending colors',
+    discountType: 'percentage',
+    discountValue: 30,
+    offerUrl: 'https://glowup.example.com/offer/30off',
+    category: 'beauty',
+    isActive: true,
+    commissionRate: 0.10,  // 10%
+    totalImpressions: 700,
+    totalClicks: 140,      // 20% CTR - Best CTR!
+    totalSales: 35,        // 5% conversion
+    totalRevenue: 1575,    // $45 AOV - Low
+    clickThroughRate: 0.20,
+    conversionRate: 0.05,
+    avgOrderValue: 45,
+    impressionsToday: 60,
+    totalSkips: 56,          // 8% skip rate - very low (attractive offer)
+    skipRate: 0.08,
+  },
+  {
+    id: 'offer-7',
+    advertiserId: 'adv-8',
+    advertiserName: 'BeautyBox',
+    title: 'Free Beauty Box with $50+ Order',
+    description: 'Curated beauty samples with your purchase',
+    discountType: 'free_shipping',
+    discountValue: 0,
+    offerUrl: 'https://beautybox.example.com/offer/freebox',
+    category: 'beauty',
+    isActive: true,
+    commissionRate: 0.15,  // 15% - Highest commission!
+    totalImpressions: 500,
+    totalClicks: 100,      // 20% CTR
+    totalSales: 70,        // 14% conversion - Best!
+    totalRevenue: 5600,    // $80 AOV
+    clickThroughRate: 0.20,
+    conversionRate: 0.14,
+    avgOrderValue: 80,
+    impressionsToday: 40,
+    totalSkips: 30,          // 6% skip rate - lowest (best performing)
+    skipRate: 0.06,
+  },
+
+  // ELECTRONICS OFFER
+  {
+    id: 'offer-8',
     advertiserId: 'adv-4',
     advertiserName: 'GadgetWorld',
     title: '$50 Off Smart Watches',
@@ -184,39 +285,21 @@ export const offers: Offer[] = [
     discountType: 'fixed_amount',
     discountValue: 50,
     offerUrl: 'https://gadgetworld.example.com/offer/50off',
-    commissionRate: 0.05,    // 5%
-    conversionRate: 0.025,   // 2.5%
-    avgOrderValue: 250,
     category: 'electronics',
     isActive: true,
+    commissionRate: 0.05,  // 5%
+    totalImpressions: 1100,
+    totalClicks: 90,       // 8.2% CTR
+    totalSales: 25,        // 2.3% conversion
+    totalRevenue: 6250,    // $250 AOV
+    clickThroughRate: 0.082,
+    conversionRate: 0.023,
+    avgOrderValue: 250,
     impressionsToday: 180,
-  },
-
-  // Additional fitness offer for tie-breaker testing
-  {
-    id: 'offer-7',
-    advertiserId: 'adv-1',
-    advertiserName: 'FitPro Supplements',
-    title: 'Buy 2 Get 1 Free - Vitamins',
-    description: 'Stock up on essential vitamins',
-    discountType: 'percentage',
-    discountValue: 33,
-    offerUrl: 'https://fitpro.example.com/offer/b2g1',
-    commissionRate: 0.0715,  // ~7.15% - Creates tie with offer-3 EVI
-    conversionRate: 0.055,   // 5.5%
-    avgOrderValue: 65,
-    category: 'fitness',
-    isActive: true,
-    impressionsToday: 80,    // Same as offer-3 for testing tie-breaker
+    totalSkips: 275,         // 25% skip rate - high (expensive product)
+    skipRate: 0.25,
   },
 ];
-
-// In-memory tracking storage (for demo purposes)
-export const trackingStore = {
-  impressions: new Map<string, { offerId: string; merchantId: string; sessionId: string; createdAt: Date }>(),
-  clicks: new Map<string, { impressionId: string; offerId: string; clickedAt: Date }>(),
-  dailyImpressionCounts: new Map<string, number>(), // offerId -> count
-};
 
 // Helper to get merchant by ID
 export function getMerchantById(id: string): Merchant | undefined {
@@ -238,5 +321,29 @@ export function incrementImpressionCount(offerId: string): void {
   const offer = offers.find(o => o.id === offerId);
   if (offer) {
     offer.impressionsToday += 1;
+    offer.totalImpressions += 1;
+    // Recalculate rates
+    offer.clickThroughRate = offer.totalClicks / offer.totalImpressions;
+    offer.conversionRate = offer.totalSales / offer.totalImpressions;
+  }
+}
+
+// Helper to record a click
+export function recordClick(offerId: string): void {
+  const offer = offers.find(o => o.id === offerId);
+  if (offer) {
+    offer.totalClicks += 1;
+    offer.clickThroughRate = offer.totalClicks / offer.totalImpressions;
+  }
+}
+
+// Helper to record a sale
+export function recordSale(offerId: string, amount: number): void {
+  const offer = offers.find(o => o.id === offerId);
+  if (offer) {
+    offer.totalSales += 1;
+    offer.totalRevenue += amount;
+    offer.conversionRate = offer.totalSales / offer.totalImpressions;
+    offer.avgOrderValue = offer.totalRevenue / offer.totalSales;
   }
 }

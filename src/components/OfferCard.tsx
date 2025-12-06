@@ -6,10 +6,31 @@ interface OfferCardProps {
   onClaim: () => void;
   onSkip: () => void;
   impressionRecorded: boolean;
+  skippedCount?: number;
+  hasMoreOffers?: boolean;
 }
 
-export function OfferCard({ offer, onClaim, onSkip, impressionRecorded }: OfferCardProps) {
+export function OfferCard({ offer, onClaim, onSkip, impressionRecorded, skippedCount = 0, hasMoreOffers = true }: OfferCardProps) {
   if (!offer) {
+    // No more offers after skipping
+    if (skippedCount > 0 && !hasMoreOffers) {
+      return (
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="text-orange-400 mb-4">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-gray-700 font-medium mb-2">No more matching offers</p>
+          <p className="text-gray-500 text-sm">
+            You've skipped {skippedCount} offer{skippedCount > 1 ? 's' : ''}.
+            Click "Get Offer" to start fresh.
+          </p>
+        </div>
+      );
+    }
+
+    // Initial state - no offer fetched yet
     return (
       <div className="bg-white rounded-lg shadow-md p-8 text-center">
         <div className="text-gray-400 mb-4">

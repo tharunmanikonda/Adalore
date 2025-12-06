@@ -65,19 +65,37 @@ export function DebugPanel({ debugInfo, isVisible, onToggle }: DebugPanelProps) 
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Offer
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Advertiser
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    EVI Score
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    EVI
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Impressions Today
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Commission Rate">Comm %</span>
                   </th>
-                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Click-Through Rate = Clicks / Impressions">CTR</span>
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Conversion Rate = Sales / Impressions">Conv %</span>
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Average Order Value">AOV</span>
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Total Impressions">Impr</span>
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Total Clicks">Clicks</span>
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Total Sales">Sales</span>
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <span title="Skip Rate = Skips / Impressions">Skip %</span>
+                  </th>
+                  <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                 </tr>
@@ -121,30 +139,69 @@ export function DebugPanel({ debugInfo, isVisible, onToggle }: DebugPanelProps) 
 }
 
 function CandidateRow({ candidate, isSelected }: { candidate: CandidateOffer; isSelected: boolean }) {
+  const formatPercent = (value: number | undefined) => {
+    if (value === undefined) return '-';
+    return `${(value * 100).toFixed(1)}%`;
+  };
+
+  const formatNumber = (value: number | undefined) => {
+    if (value === undefined) return '-';
+    return value.toLocaleString();
+  };
+
+  const formatCurrency = (value: number | undefined) => {
+    if (value === undefined) return '-';
+    return `$${value.toFixed(0)}`;
+  };
+
   return (
     <tr className={isSelected ? 'bg-green-50' : candidate.eligible ? '' : 'bg-gray-50'}>
-      <td className="px-4 py-3 whitespace-nowrap">
+      <td className="px-3 py-3 whitespace-nowrap">
         <div className="flex items-center">
           {isSelected && (
-            <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
           )}
           <span className={`text-sm ${isSelected ? 'font-semibold text-green-700' : 'text-gray-900'}`}>
-            {candidate.offerId}
+            {candidate.advertiserName}
           </span>
         </div>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-        {candidate.advertiserName}
-      </td>
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-mono">
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono font-semibold text-blue-600">
         {candidate.evi.toFixed(4)}
       </td>
-      <td className="px-4 py-3 whitespace-nowrap text-sm text-right font-mono">
-        {candidate.impressionsToday}
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono">
+        {formatPercent(candidate.commissionRate)}
       </td>
-      <td className="px-4 py-3 whitespace-nowrap text-center">
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono">
+        <span className={candidate.clickThroughRate && candidate.clickThroughRate > 0.15 ? 'text-green-600 font-medium' : ''}>
+          {formatPercent(candidate.clickThroughRate)}
+        </span>
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono">
+        <span className={candidate.conversionRate && candidate.conversionRate > 0.05 ? 'text-green-600 font-medium' : ''}>
+          {formatPercent(candidate.conversionRate)}
+        </span>
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono">
+        {formatCurrency(candidate.avgOrderValue)}
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono text-gray-500">
+        {formatNumber(candidate.totalImpressions)}
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono text-gray-500">
+        {formatNumber(candidate.totalClicks)}
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono text-gray-500">
+        {formatNumber(candidate.totalSales)}
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-right font-mono">
+        <span className={candidate.skipRate && candidate.skipRate > 0.25 ? 'text-red-600 font-medium' : 'text-gray-500'}>
+          {formatPercent(candidate.skipRate)}
+        </span>
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-center">
         {candidate.eligible ? (
           <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
             Eligible
