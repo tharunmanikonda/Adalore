@@ -1,7 +1,7 @@
 import type { Merchant, Offer } from '../types';
 
-// API base URL - empty for same-origin requests
-const API_BASE = '';
+// API base URL - use environment variable for production, fallback to localhost for dev
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:6000';
 
 // ============================================================================
 // MERCHANT OPERATIONS
