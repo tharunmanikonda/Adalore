@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { deleteOffer, updateOffer } from '../../backend/services/database';
+import { deleteOffer, updateOffer } from '../_lib/database';
 
 /**
  * DELETE /api/offers/:id - Delete an offer

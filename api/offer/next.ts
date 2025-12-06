@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { selectNextOffer } from '../../backend/services/matchingEngine';
-import { getMerchantById, getActiveOffers, recordImpression } from '../../backend/services/database';
+import { selectNextOffer } from '../_lib/matchingEngine';
+import { getMerchantById, getActiveOffers, recordImpression } from '../_lib/database';
 
 /**
  * GET /api/offer/next

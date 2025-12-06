@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getOffers, getActiveOffers, createOffer } from '../../backend/services/database';
+import { getOffers, getActiveOffers, createOffer } from '../_lib/database';
 
 /**
  * GET /api/offers - List offers (active=true for active only)

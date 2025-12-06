@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getAdvertisers, createAdvertiser } from '../../backend/services/database';
+import { getAdvertisers, createAdvertiser } from '../_lib/database';
 
 /**
  * GET /api/advertisers - List all advertisers

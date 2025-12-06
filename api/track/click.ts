@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { recordClick } from '../../backend/services/database';
+import { recordClick } from '../_lib/database';
 
 /**
  * POST /api/track/click

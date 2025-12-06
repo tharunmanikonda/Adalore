@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { recordImpression } from '../../backend/services/database';
+import { recordImpression } from '../_lib/database';
 
 /**
  * POST /api/track/impression

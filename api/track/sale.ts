@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { recordSale } from '../../backend/services/database';
+import { recordSale } from '../_lib/database';
 
 /**
  * POST /api/track/sale

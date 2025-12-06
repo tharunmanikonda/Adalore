@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { recordSkip } from '../../backend/services/database';
+import { recordSkip } from '../_lib/database';
 
 /**
  * POST /api/track/skip

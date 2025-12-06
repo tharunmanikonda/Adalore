@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { deleteAdvertiser } from '../../backend/services/database';
+import { deleteAdvertiser } from '../_lib/database';
 
 /**
  * DELETE /api/advertisers/:id - Delete an advertiser

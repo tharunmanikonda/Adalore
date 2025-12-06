@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { deleteMerchant, updateMerchant } from '../../backend/services/database';
+import { deleteMerchant, updateMerchant } from '../_lib/database';
 
 /**
  * DELETE /api/merchants/:id - Delete a merchant
