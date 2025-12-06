@@ -1,4 +1,4 @@
-import type { Offer, Merchant, GetOfferResponse, CandidateOffer, MatchingDebugInfo } from './types';
+import type { Offer, Merchant, GetOfferResponse, CandidateOffer, MatchingDebugInfo } from './types.js';
 
 /**
  * Calculate Expected Value Index (EVI) for an offer

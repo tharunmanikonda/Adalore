@@ -1,6 +1,6 @@
-import { supabase, isSupabaseConfigured } from './supabase';
-import type { Merchant, Offer, DbMerchant, DbOffer, DbAdvertiser } from './types';
-import { dbToMerchant, dbToOffer } from './types';
+import { supabase, isSupabaseConfigured } from './supabase.js';
+import type { Merchant, Offer, DbMerchant, DbOffer, DbAdvertiser } from './types.js';
+import { dbToMerchant, dbToOffer } from './types.js';
 
 // ============================================================================
 // MERCHANT OPERATIONS

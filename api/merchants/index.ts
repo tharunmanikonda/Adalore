@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getMerchants, createMerchant } from '../_lib/database';
+import { getMerchants, createMerchant } from '../_lib/database.js';
 
 /**
  * GET /api/merchants - List all merchants
