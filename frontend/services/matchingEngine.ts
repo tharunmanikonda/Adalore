@@ -118,3 +118,21 @@ export function selectNextOffer(
 
   return response;
 }
+
+/**
+ * Get all offers sorted by EVI for a category
+ */
+export function getOfferRankings(
+  offers: Offer[],
+  category: string
+): Array<{ offer: Offer; evi: number; rank: number }> {
+  const categoryOffers = offers
+    .filter(o => o.category === category && o.isActive)
+    .map(o => ({ offer: o, evi: calculateEVI(o) }))
+    .sort((a, b) => b.evi - a.evi);
+
+  return categoryOffers.map((item, index) => ({
+    ...item,
+    rank: index + 1,
+  }));
+}

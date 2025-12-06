@@ -4,8 +4,8 @@ import {
   isOfferEligible,
   selectNextOffer,
   getOfferRankings,
-} from '../backend/services/matchingEngine';
-import type { Merchant, Offer } from '../backend/types';
+} from '../frontend/services/matchingEngine';
+import type { Merchant, Offer } from '../frontend/types';
 
 // Test data
 const createMerchant = (overrides: Partial<Merchant> = {}): Merchant => ({
